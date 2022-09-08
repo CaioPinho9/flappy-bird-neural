@@ -1,15 +1,16 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Controller : MonoBehaviour
 {
     [Header("Config")]
     public int birdAmmount;
     public int birdSurviveAmmount;
+    public float randomAmmount;
     public GameObject prefab;
 
     [Header("Manage")]
@@ -17,6 +18,9 @@ public class Controller : MonoBehaviour
     public GameObject bestBird;
     public List<GameObject> bestBirds;
     public GameObject[] birds;
+    private GameObject nextObstacle;
+    private int obstacleId = 0;
+    private int gen = 1;
 
     [Header("Timer")]
     public float time;
@@ -27,6 +31,9 @@ public class Controller : MonoBehaviour
     {
         CreateBirds(birdAmmount);
         birds = GameObject.FindGameObjectsWithTag("Player");
+        birds[0].GetComponent<Player>().Start();
+        GameObject.Find("UI").GetComponent<NetworkUI>().Build(birds[0]);
+        GameObject.Find("alive").GetComponent<Text>().text = "Birds " + birdAmmount.ToString() + " / " + birdAmmount.ToString();
     }
 
     // Update is called once per frame
@@ -40,8 +47,16 @@ public class Controller : MonoBehaviour
         }
         time += Time.deltaTime;
 
+        if (nextObstacle == null || nextObstacle.transform.position.x < -.26f)
+        {
+            DetectObstacle();
+        }
+
+        ObstacleCoords();
+
         if (birdAlive <= 0)
         {
+            Check();
             Restart();
         }
     }
@@ -52,6 +67,7 @@ public class Controller : MonoBehaviour
         {
             GameObject bird = Instantiate(prefab);
             bird.transform.parent = transform;
+            bird.GetComponent<Player>().id = i;
         }
     }
 
@@ -59,13 +75,14 @@ public class Controller : MonoBehaviour
     {
         birdAlive = birdAmmount;
         bestBird = birds[0];
+        bestBirds.Clear();
         foreach (GameObject bird in birds)
         {
             bird.GetComponent<Player>().visible = false;
             if (bird.GetComponent<Player>().gameOver)
             {
                 birdAlive--;
-                bird.GetComponent<Player>().visible = true;
+                GameObject.Find("alive").GetComponent<Text>().text = "Birds " + birdAlive.ToString() + " / " + birdAmmount.ToString();
             }
 
             if (bestBird.GetComponent<Player>().score < bird.GetComponent<Player>().score)
@@ -81,38 +98,114 @@ public class Controller : MonoBehaviour
             }
             else
             {
-                for (int index = 0; index < bestBirds.Count; index++)
+                int index = 0;
+                for (int i = 0; i < bestBirds.Count; i++)
                 {
-                    if (bestBirds[index].GetComponent<Player>().score < bird.GetComponent<Player>().score)
+                    for (int j = 0; j < bestBirds.Count; j++)
                     {
-                        bestBirds[index] = bird;
-                        bird.GetComponent<Player>().visible = true;
+                        if (bestBirds[i].GetComponent<Player>().score < bestBirds[j].GetComponent<Player>().score &&
+                            bestBirds[i].GetComponent<Player>().score < bestBirds[index].GetComponent<Player>().score)
+                        {
+                            index = i;
+                        }
                     }
+                }
+
+                if (bestBirds[index].GetComponent<Player>().score < bird.GetComponent<Player>().score)
+                {
+                    bestBirds[index] = bird;
+                    bird.GetComponent<Player>().visible = true;
                 }
             }
         }
+        GameObject.Find("best").GetComponent<Text>().text = "Best ID " + bestBird.GetComponent<Player>().id.ToString();
+    }
+
+    void UpdateUI()
+    {
+        gen++;
+        GameObject.Find("UI").GetComponent<NetworkUI>().Build(bestBird);
+        GameObject.Find("Window Chart").GetComponent<WindowGraph>().score.Add((int)bestBird.GetComponent<Player>().score);
+        GameObject.Find("gen").GetComponent<Text>().text = "Gen " + gen.ToString();
     }
 
     void Restart()
     {
+        obstacleId = 0;
         int index = 0;
         int lastIndex = -1;
         string dna = "";
+        birdAlive = birdAmmount;
+        UpdateUI();
+
         foreach (GameObject bird in birds)
         {
-            int bestBirdIndex = (int)Math.Floor(index / (double)(birdAmmount / 10));
-            GameObject birdMother = bestBirds[bestBirdIndex];
-
-            if (bestBirdIndex != lastIndex)
+            bool isBest = false;
+            foreach (GameObject best in bestBirds)
             {
-                dna = birdMother.GetComponent<Player>().Copy();
-                lastIndex = bestBirdIndex;
+                if (bird.GetComponent<Player>().id == best.GetComponent<Player>().id)
+                {
+                    isBest = true;
+                }
             }
+            if (isBest)
+            {
+                bird.GetComponent<Player>().Restart();
+            } 
+            else
+            {
+                int bestBirdIndex = (int)Math.Floor((double)index * (1 + randomAmmount) * (double)(birdSurviveAmmount / (double)(birdAmmount - birdSurviveAmmount)));
+                bird.GetComponent<Player>().Restart();
+                if (bestBirdIndex < bestBirds.Count)
+                {
+                    GameObject birdMother = bestBirds[bestBirdIndex];
 
-            bird.GetComponent<Player>().RestartNetwork();
-            bird.GetComponent<Player>().Paste(dna);
-            bird.GetComponent<Player>().Mutate();
-            index++;
+                    if (bestBirdIndex != lastIndex)
+                    {
+                        dna = birdMother.GetComponent<Player>().network.Copy();
+                        lastIndex = bestBirdIndex;
+                    }
+                    bird.GetComponent<Player>().network.Paste(dna);
+                    bird.GetComponent<Player>().network.Mutate();
+                }
+                else
+                {
+                    bird.GetComponent<Player>().network.Random();
+                }
+                index++;
+            }
+        }
+        GameObject.Find("ObstacleSpawner").GetComponent<Spawner>().Start();
+    }
+
+    void DetectObstacle()
+    {
+        GameObject[] obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
+        foreach (GameObject obstacle in obstacles)
+        {
+            if (obstacle.GetComponent<Obstacle>().id == obstacleId)
+            {
+                nextObstacle = obstacle;
+                obstacleId++;
+                break;
+            }
+        }
+    }
+
+    void ObstacleCoords()
+    {
+        foreach (GameObject bird in birds)
+        {
+            if (nextObstacle != null)
+            {
+                bird.GetComponent<Player>().obstacleX = nextObstacle.transform.position.x;
+                bird.GetComponent<Player>().obstacleY = nextObstacle.transform.position.y;
+            } 
+            else
+            {
+                bird.GetComponent<Player>().obstacleX = 0;
+                bird.GetComponent<Player>().obstacleY = 0;
+            }
         }
     }
 }

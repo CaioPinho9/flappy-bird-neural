@@ -1,37 +1,52 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using static Unity.Burst.Intrinsics.Arm;
-using static UnityEditor.Experimental.GraphView.GraphView;
+using UnityEngine.Rendering;
 
 public class Player : MonoBehaviour
 {
     private Rigidbody2D rigidbody;
     public NeuralNetwork network;
+
     public float velocity = 2.4f;
     public float jump;
-    public float x;
+
     public float y;
-    public float score;
-    public bool visible = false;
+    public float obstacleX;
+    public float obstacleY;
+
+    public float score = 0;
     public bool gameOver = false;
+    public bool visible = false;
+    public string dna = "";
+    private string rna = "";
+    public int id;
+
     public float time;
-    public float queueTime = .5f;
+    public float queueTime = .1f;
 
     // Start is called before the first frame update
-    void Start()
+    public void Start()
+    {
+        network = new();
+        rigidbody = GetComponent<Rigidbody2D>();
+        rigidbody.freezeRotation = true;
+        if (dna == "")
+        {
+            dna = network.dna;
+            rna = dna;
+        }
+    }
+
+    public void Restart()
     {
         score = 0;
         gameOver = false;
-        rigidbody = GetComponent<Rigidbody2D>();
-        rigidbody.freezeRotation = true;
-        rigidbody.isKinematic = false;
         GetComponent<SpriteRenderer>().color = new(1f, 1f, 1f, visible ? 1f : .5f);
         GetComponent<SpriteRenderer>().sortingOrder = 1;
         GetComponent<Animator>().enabled = true;
-        network = new();
-        
+        transform.position = new(0, 0, 0);
+        rigidbody.isKinematic = false;
     }
 
     // Update is called once per frame
@@ -39,9 +54,16 @@ public class Player : MonoBehaviour
     {
         if (!gameOver)
         {
-            if (Input.GetMouseButtonDown(0))
+            if (rna != dna)
             {
-                rigidbody.velocity = Vector2.up * velocity;
+                rna = dna;
+                network.Paste(dna);
+            }
+            GetComponent<SpriteRenderer>().color = new(1f, 1f, 1f, visible ? 1f : .5f);
+
+            if (transform.position.y > 1.4f)
+            {
+                Death();
             }
 
             if (time > queueTime)
@@ -55,44 +77,49 @@ public class Player : MonoBehaviour
             {
                 rigidbody.velocity = Vector2.up * velocity;
             }
+            score += Time.deltaTime;
+            y = transform.position.y;
         }
-        score += Time.deltaTime;
-        x = transform.position.x;
-        y = transform.position.y;
     }
 
     private void RunNetwork()
     {
         network.Clear();
-        network.Input();
+        network.Input(transform.position.y, obstacleX - transform.position.x, obstacleY - transform.position.y);
         network.Forward();
 
-        jump = (network.layer[network.lastLayer].neuron[0].output > 0) ? 1 : 0;
+        jump = (network.layer[network.lastLayer - 1].neuron[0].output > 0) ? 1 : 0;
+    }
+
+    private void Death()
+    {
+        gameOver = true;
+        rigidbody.isKinematic = true;
+        rigidbody.velocity = Vector3.zero;
+        GetComponent<SpriteRenderer>().color = Color.black;
+        GetComponent<SpriteRenderer>().sortingOrder = 0;
+        GetComponent<Animator>().enabled = false;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (!collision.CompareTag("Player"))
         {
-            gameOver = true;
-            rigidbody.isKinematic = true;
-            rigidbody.velocity = Vector3.zero;
-            GetComponent<SpriteRenderer>().color = Color.black;
-            GetComponent<SpriteRenderer>().sortingOrder = 0;
-            GetComponent<Animator>().enabled = false;
+            Death();
         }
     }
 }
 
 public class NeuralNetwork
 {
-    public static int[] neuronsLayer = { 2, 3, 3, 1 };
+    public static int[] neuronsLayer = { 2, 2, 1 };
     public int lastLayer = neuronsLayer.Length;
 
     public Layer[] layer = new Layer[neuronsLayer.Length];
 
     public string dna;
-    public static int randomStart = 100;
+    public static int weightLimit = 100;
+    public int mutate = 1;
 
     public NeuralNetwork()
     {
@@ -105,11 +132,14 @@ public class NeuralNetwork
                 //Which layer is this
                 layerId = i,
                 //Range of link weight
-                randomStart = randomStart,
+                randomStart = weightLimit,
                 //How long is the network
                 networkSize = neuronsLayer.Length
             };
         }
+        CreateNeurons();
+        LinkLayers();
+        dna = Copy();
     }
 
     public string Copy()
@@ -144,7 +174,60 @@ public class NeuralNetwork
             }
         }
     }
-    
+
+    public void Mutate()
+    {
+        foreach (Layer layer in layer)
+        {
+            foreach (Link link in layer.link)
+            {
+                float random = UnityEngine.Random.Range(-mutate, mutate);
+                if (link.weight < weightLimit && link.weight > -weightLimit)
+                {
+                    link.weight += random;
+                }
+                else if (link.weight >= weightLimit)
+                {
+                    link.weight -= Math.Abs(random);
+                }
+                else
+                {
+                    link.weight += Math.Abs(random);
+                }
+
+                random = UnityEngine.Random.Range(-mutate, mutate);
+                if (link.bias < mutate && link.bias > -mutate)
+                {
+                    link.bias += random;
+                }
+                else if (link.weight >= mutate)
+                {
+                    link.bias -= Math.Abs(random);
+                }
+                else
+                {
+                    link.bias += Math.Abs(random);
+                }
+            }
+        }
+        dna = Copy();
+    }
+
+    public void Random()
+    {
+        foreach (Layer layer in layer)
+        {
+            foreach (Link link in layer.link)
+            {
+                float random = UnityEngine.Random.Range(-weightLimit, weightLimit);
+                link.weight = random;
+
+                random = UnityEngine.Random.Range(-weightLimit, weightLimit);
+                link.bias = random;
+            }
+        }
+    }
+
     public void CreateNeurons()
     {
         int neuronId = 0;
@@ -179,6 +262,12 @@ public class NeuralNetwork
                 }
             }
         }
+    }
+
+    public void Input(float y, float obstacleX, float obstacleY)
+    {
+        layer[0].neuron[0].output = obstacleX;
+        layer[0].neuron[1].output = obstacleY;
     }
 
     public void Forward()

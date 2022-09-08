@@ -102,10 +102,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocity: 2.4
   jump: 0
-  x: 0
   y: 0
+  obstacleX: 0
+  obstacleY: 0
+  score: 0
   gameOver: 0
-  survived: 0
+  visible: 0
+  dna: 
+  id: 0
+  time: 0
+  queueTime: 0.1
 --- !u!50 &4408863456470442346
 Rigidbody2D:
   serializedVersion: 4
