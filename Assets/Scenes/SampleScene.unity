@@ -797,7 +797,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7031e87b3f54474bb1ab28e657aa3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  birdAmmount: 200
+  birdAmmount: 100
   birdSurviveAmmount: 10
   randomAmmount: 0.25
   prefab: {fileID: 3744368613511478866, guid: 5057067ac350af046af2881284d7a608, type: 3}

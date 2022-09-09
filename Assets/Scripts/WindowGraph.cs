@@ -1,8 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Dependencies.NCalc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,7 +43,7 @@ public class WindowGraph : MonoBehaviour
 
     private GameObject CreateCircle(Vector2 anchoredPosition)
     {
-        GameObject gameObject = new GameObject("circle", typeof(Image));
+        GameObject gameObject = new("circle", typeof(Image));
         gameObject.transform.SetParent(graphContainer, false);
         gameObject.transform.localScale = new Vector3(.5f, .5f, .5f);
         gameObject.GetComponent<Image>().sprite = circleSprite;

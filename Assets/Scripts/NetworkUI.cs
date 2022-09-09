@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Color = UnityEngine.Color;
-using Random = UnityEngine.Random;
 
 public class NetworkUI : MonoBehaviour
 {
