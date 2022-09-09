@@ -42,7 +42,7 @@ public class Player : MonoBehaviour
     {
         score = 0;
         gameOver = false;
-        GetComponent<SpriteRenderer>().color = new(1f, 1f, 1f, visible ? 1f : .5f);
+        GetComponent<SpriteRenderer>().color = new(1f, 1f, 1f, visible ? 1f : .2f);
         GetComponent<SpriteRenderer>().sortingOrder = 1;
         GetComponent<Animator>().enabled = true;
         transform.position = new(0, 0, 0);
@@ -59,7 +59,7 @@ public class Player : MonoBehaviour
                 rna = dna;
                 network.Paste(dna);
             }
-            GetComponent<SpriteRenderer>().color = new(1f, 1f, 1f, visible ? 1f : .5f);
+            GetComponent<SpriteRenderer>().color = new(1f, 1f, 1f, visible ? 1f : .2f);
 
             if (transform.position.y > 1.4f)
             {
@@ -70,13 +70,13 @@ public class Player : MonoBehaviour
             {
                 RunNetwork();
                 time = 0;
+
+                if (jump > 0)
+                {
+                    rigidbody.velocity = Vector2.up * velocity;
+                }
             }
             time += Time.deltaTime;
-
-            if (jump > 0)
-            {
-                rigidbody.velocity = Vector2.up * velocity;
-            }
             score += Time.deltaTime;
             y = transform.position.y;
         }
@@ -118,8 +118,8 @@ public class NeuralNetwork
     public Layer[] layer = new Layer[neuronsLayer.Length];
 
     public string dna;
-    public static int weightLimit = 100;
-    public int mutate = 1;
+    public static int weightLimit = 2000;
+    public int mutate = 20;
 
     public NeuralNetwork()
     {
@@ -151,7 +151,7 @@ public class NeuralNetwork
         {
             foreach (Link link in layer.link)
             {
-                dna += link.weight + "/" + link.bias + ";";
+                dna += link.weight.ToString("0.00") + "/" + link.bias.ToString("0.00") + ";";
             }
         }
         return dna;
@@ -181,7 +181,7 @@ public class NeuralNetwork
         {
             foreach (Link link in layer.link)
             {
-                float random = UnityEngine.Random.Range(-mutate, mutate);
+                float random = RandomNumber(mutate);
                 if (link.weight < weightLimit && link.weight > -weightLimit)
                 {
                     link.weight += random;
@@ -195,7 +195,7 @@ public class NeuralNetwork
                     link.weight += Math.Abs(random);
                 }
 
-                random = UnityEngine.Random.Range(-mutate, mutate);
+                random = RandomNumber(mutate);
                 if (link.bias < mutate && link.bias > -mutate)
                 {
                     link.bias += random;
@@ -219,13 +219,18 @@ public class NeuralNetwork
         {
             foreach (Link link in layer.link)
             {
-                float random = UnityEngine.Random.Range(-weightLimit, weightLimit);
+                float random = RandomNumber(weightLimit);
                 link.weight = random;
 
-                random = UnityEngine.Random.Range(-weightLimit, weightLimit);
+                random = RandomNumber(weightLimit);
                 link.bias = random;
             }
         }
+    }
+
+    public float RandomNumber(float limit)
+    {
+        return (float)UnityEngine.Random.Range(-limit, limit) + (float)UnityEngine.Random.Range(-100, 100) / 100;
     }
 
     public void CreateNeurons()
@@ -266,6 +271,7 @@ public class NeuralNetwork
 
     public void Input(float y, float obstacleX, float obstacleY)
     {
+        //layer[0].neuron[0].output = y;
         layer[0].neuron[0].output = obstacleX;
         layer[0].neuron[1].output = obstacleY;
     }

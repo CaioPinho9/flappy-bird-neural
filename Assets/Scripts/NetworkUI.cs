@@ -25,6 +25,13 @@ public class NetworkUI : MonoBehaviour
     public Material material;
 
     private bool built = false;
+    private float weightLimit;
+
+
+    private void Start()
+    {
+        weightLimit = NeuralNetwork.weightLimit;
+    }
 
     // Update is called once per frame
     private void FixedUpdate()
@@ -150,10 +157,13 @@ public class NetworkUI : MonoBehaviour
                 //Check if neuron2 is in the next layer
                 if (neuron1.layer.layerId == neuron2.layer.layerId - 1)
                 {
+                    /*
+                    Filling empty links
                     if (index >= linkData.Count)
                     {
-                        linkData.Add(new(neuron1, neuron1, Random.Range(-100, 100), Random.Range(-100, 100)));
+                        linkData.Add(new(neuron1, neuron1, Random.Range(-weightLimit, weightLimit), Random.Range(-weightLimit, weightLimit)));
                     }
+                    */
 
                     ArrayList colorWidth = ColorWidth(index);
 
@@ -168,7 +178,7 @@ public class NetworkUI : MonoBehaviour
     private ArrayList ColorWidth(int index)
     {
         //Width is based on the weight of the link
-        float weight = Mathf.Abs(linkData[index].weight / 100);
+        float weight = Mathf.Abs(linkData[index].weight / weightLimit);
         float width = 0.03f * weight;
         if (width < 0.01f) { width = 0.01f; }
 

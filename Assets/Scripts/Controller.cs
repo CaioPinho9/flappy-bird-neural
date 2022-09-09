@@ -34,6 +34,7 @@ public class Controller : MonoBehaviour
         birds[0].GetComponent<Player>().Start();
         GameObject.Find("UI").GetComponent<NetworkUI>().Build(birds[0]);
         GameObject.Find("alive").GetComponent<Text>().text = "Birds " + birdAmmount.ToString() + " / " + birdAmmount.ToString();
+        Check();
     }
 
     // Update is called once per frame
@@ -137,6 +138,8 @@ public class Controller : MonoBehaviour
         string dna = "";
         birdAlive = birdAmmount;
         UpdateUI();
+
+        Debug.Log(bestBird.GetComponent<Player>().network.Copy());
 
         foreach (GameObject bird in birds)
         {
