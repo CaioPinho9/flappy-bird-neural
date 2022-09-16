@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class Player : MonoBehaviour
 {
-    private Rigidbody2D rigidbody;
+    private Rigidbody2D rb;
     public NeuralNetwork network;
 
     public float velocity = 2.4f;
@@ -29,8 +28,8 @@ public class Player : MonoBehaviour
     public void Start()
     {
         network = new();
-        rigidbody = GetComponent<Rigidbody2D>();
-        rigidbody.freezeRotation = true;
+        rb = GetComponent<Rigidbody2D>();
+        rb.freezeRotation = true;
         if (dna == "")
         {
             dna = network.dna;
@@ -46,7 +45,7 @@ public class Player : MonoBehaviour
         GetComponent<SpriteRenderer>().sortingOrder = 1;
         GetComponent<Animator>().enabled = true;
         transform.position = new(0, 0, 0);
-        rigidbody.isKinematic = false;
+        rb.isKinematic = false;
     }
 
     // Update is called once per frame
@@ -73,7 +72,7 @@ public class Player : MonoBehaviour
 
                 if (jump > 0)
                 {
-                    rigidbody.velocity = Vector2.up * velocity;
+                    rb.velocity = Vector2.up * velocity;
                 }
             }
             time += Time.deltaTime;
@@ -94,8 +93,8 @@ public class Player : MonoBehaviour
     private void Death()
     {
         gameOver = true;
-        rigidbody.isKinematic = true;
-        rigidbody.velocity = Vector3.zero;
+        rb.isKinematic = true;
+        rb.velocity = Vector3.zero;
         GetComponent<SpriteRenderer>().color = Color.black;
         GetComponent<SpriteRenderer>().sortingOrder = 0;
         GetComponent<Animator>().enabled = false;

@@ -8,9 +8,9 @@ using UnityEngine.UI;
 public class Controller : MonoBehaviour
 {
     [Header("Config")]
-    public int birdAmmount;
-    public int birdSurviveAmmount;
-    public float randomAmmount;
+    public int birdAmount;
+    public int birdSurviveAmount;
+    public float randomAmount;
     public GameObject prefab;
 
     [Header("Manage")]
@@ -29,11 +29,11 @@ public class Controller : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        CreateBirds(birdAmmount);
+        CreateBirds(birdAmount);
         birds = GameObject.FindGameObjectsWithTag("Player");
         birds[0].GetComponent<Player>().Start();
         GameObject.Find("UI").GetComponent<NetworkUI>().Build(birds[0]);
-        GameObject.Find("alive").GetComponent<Text>().text = "Birds " + birdAmmount.ToString() + " / " + birdAmmount.ToString();
+        GameObject.Find("alive").GetComponent<Text>().text = "Birds " + birdAmount.ToString() + " / " + birdAmount.ToString();
         Check();
     }
 
@@ -74,7 +74,7 @@ public class Controller : MonoBehaviour
 
     void Check()
     {
-        birdAlive = birdAmmount;
+        birdAlive = birdAmount;
         bestBird = birds[0];
         bestBirds.Clear();
         foreach (GameObject bird in birds)
@@ -83,7 +83,7 @@ public class Controller : MonoBehaviour
             if (bird.GetComponent<Player>().gameOver)
             {
                 birdAlive--;
-                GameObject.Find("alive").GetComponent<Text>().text = "Birds " + birdAlive.ToString() + " / " + birdAmmount.ToString();
+                GameObject.Find("alive").GetComponent<Text>().text = "Birds " + birdAlive.ToString() + " / " + birdAmount.ToString();
             }
 
             if (bestBird.GetComponent<Player>().score < bird.GetComponent<Player>().score)
@@ -92,7 +92,7 @@ public class Controller : MonoBehaviour
                 bird.GetComponent<Player>().visible = true;
             }
 
-            if (bestBirds.Count < birdSurviveAmmount)
+            if (bestBirds.Count < birdSurviveAmount)
             {
                 bestBirds.Add(bird);
                 bird.GetComponent<Player>().visible = true;
@@ -136,7 +136,7 @@ public class Controller : MonoBehaviour
         int index = 0;
         int lastIndex = -1;
         string dna = "";
-        birdAlive = birdAmmount;
+        birdAlive = birdAmount;
         UpdateUI();
 
         Debug.Log(bestBird.GetComponent<Player>().network.Copy());
@@ -157,7 +157,7 @@ public class Controller : MonoBehaviour
             } 
             else
             {
-                int bestBirdIndex = (int)Math.Floor((double)index * (1 + randomAmmount) * (double)(birdSurviveAmmount / (double)(birdAmmount - birdSurviveAmmount)));
+                int bestBirdIndex = (int)Math.Floor((double)index * (1 + randomAmount) * (double)(birdSurviveAmount / (double)(birdAmount - birdSurviveAmount)));
                 bird.GetComponent<Player>().Restart();
                 if (bestBirdIndex < bestBirds.Count)
                 {
