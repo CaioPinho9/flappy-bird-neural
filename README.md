@@ -21,7 +21,7 @@ Distances are better than position because if it works in one point, it works fo
 
 A neural network is a complex function. It receives information in the first layer also known as the input layer, processes in the hidden layers, and results in the output layer, which is used to control the bird.  
 
-[![Layer](assets/logo.png)](https://imgur.com/a/6SIQBqp)
+[![Layer](Assets/Sprites/layer.png)](https://imgur.com/a/6SIQBqp)
 Layer: Each layer has an X amount of neurons, they are linked in order.  
 
 Input Layer: This layer receives the x and y distance from the passage between the pipes.  
@@ -37,7 +37,7 @@ Links: For example, all neurons of the first layer are linked with all neurons o
 
 You can watch this project working here.
 
-[![Flappy Bird Test](http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg)](https://youtu.be/p15tzfX17ig "Flappy Bird Test")
+[![Flappy Bird Test](http://img.youtube.com/vi/p15tzfX17ig/0.jpg)](https://youtu.be/p15tzfX17ig "Flappy Bird Test")
 ## Tech Stack
 
 **Language:** C#
