@@ -1,17 +1,17 @@
 
 # Flappy Bird Neural
 
-Neural Networks are really interesting and I always wanted to create my own. So I choose a simple game to test. Flappy Bird is a famous mobile game and it's a perfect test subject.
+Neural Networks are really interesting and I always wanted to create my own. So I chose a simple game to test. Flappy Bird is a famous mobile game and it's a perfect test subject.
 ## Features
 
-- Control over how many individuals
-- Random individuals to avoid local minimum
+- Control over how many individuals exists in the game
+- Random individuals to avoid [local minimum](https://en.wikipedia.org/wiki/Maxima_and_minima)
 - Interface shows with neurons are active at the moment
 - Chart to show the progress of generations
 
 ## Lessons Learned
 
-I learned Neural networks can use a lot of processing power, so I needed to optimize the best I could, so I removed many “foreachs” and unified them into just one. Also, I limited how many times per second some things activate, for example, the network only activates once per .5s.  
+I learned Neural networks can use a lot of processing power. I needed to optimize the best I could, so I removed many “foreachs” and unified them into just one. Also, I limited how many times per second some things activate, for example, the network only activates every half second.  
 
 Complexity is not the solution, the simplest the network is, the easiest to train.  
 
@@ -26,7 +26,7 @@ A neural network is a complex function. It receives information in the first lay
 Layer: Each layer has an X amount of neurons, they are linked in order.  
 
 Input Layer: This layer receives the x and y distance from the passage between the pipes.  
-Hidden Layer: Neurons in this layer receive information from all neurons in the last layer, all the info is sum and stored in the neuron.  
+Hidden Layer: Neurons in this layer receive information from all neurons in the last layer, all the info is summed and stored in the neuron.  
 
 Output Layer: Works like a hidden layer, but it won't pass information forward, instead its information is used to control the bird  
 
