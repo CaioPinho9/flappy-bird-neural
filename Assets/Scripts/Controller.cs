@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Controller : MonoBehaviour
@@ -29,6 +28,10 @@ public class Controller : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        birdAmount = Menu.birdAmount;
+        birdSurviveAmount = Menu.birdSurviveAmount;
+        randomAmount = Menu.randomAmount;
+
         CreateBirds(birdAmount);
         birds = GameObject.FindGameObjectsWithTag("Player");
         birds[0].GetComponent<Player>().Start();
@@ -40,6 +43,12 @@ public class Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKey(KeyCode.Escape)) 
+        {
+            RestartGame();
+            SceneManager.LoadScene("Menu");
+        }
+
         if (time > queueTime)
         {
             Check();
@@ -59,6 +68,15 @@ public class Controller : MonoBehaviour
         {
             Check();
             Restart();
+        }
+    }
+
+    private void RestartGame()
+    {
+        gen = 0;
+        foreach (GameObject bird in birds)
+        {
+            Destroy(bird);
         }
     }
 
