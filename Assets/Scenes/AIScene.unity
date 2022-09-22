@@ -386,6 +386,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: UI
       objectReference: {fileID: 0}
+    - target: {fileID: 7381499056344951101, guid: a9138362ce2cf4f4daa7667779f6c786, type: 3}
+      propertyPath: startX
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7595889583371901056, guid: a9138362ce2cf4f4daa7667779f6c786, type: 3}
       propertyPath: m_RootOrder
       value: 5
@@ -797,9 +801,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7031e87b3f54474bb1ab28e657aa3b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  birdAmmount: 100
-  birdSurviveAmmount: 10
-  randomAmmount: 0.25
+  birdAmount: 0
+  birdSurviveAmount: 0
+  randomAmount: 0
   prefab: {fileID: 3744368613511478866, guid: 5057067ac350af046af2881284d7a608, type: 3}
   birdAlive: 0
   bestBird: {fileID: 0}

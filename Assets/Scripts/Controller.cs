@@ -43,7 +43,7 @@ public class Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.Escape)) 
+        if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.M)) 
         {
             RestartGame();
             SceneManager.LoadScene("Menu");
